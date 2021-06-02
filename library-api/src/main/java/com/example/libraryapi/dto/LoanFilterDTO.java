@@ -11,12 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanDTO {
-	
-	private Long id;
+public class LoanFilterDTO {
 	private String isbn;
-	
-	// cliente
 	private String customer;
-	private BookDTO book;
 }

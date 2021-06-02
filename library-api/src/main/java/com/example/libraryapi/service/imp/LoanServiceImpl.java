@@ -2,6 +2,10 @@ package com.example.libraryapi.service.imp;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.example.libraryapi.dto.LoanFilterDTO;
 import com.example.libraryapi.exceptions.BusinnesException;
 import com.example.libraryapi.model.Loan;
 import com.example.libraryapi.repository.LoanRepository;
@@ -35,6 +39,12 @@ public class LoanServiceImpl implements LoanService {
 	@Override
 	public Loan update(Loan loan) {
 		return repository.save(loan);
+	}
+
+
+	@Override
+	public Page<Loan> find(LoanFilterDTO loanFilterDTO, Pageable pageable) {
+		return repository.findByBookIsbnOrCustomer(loanFilterDTO.getIsbn(), loanFilterDTO.getCustomer(), pageable);
 	}
 	
 }
