@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.libraryapi.dto.BookDTO;
 import com.example.libraryapi.model.Book;
@@ -48,31 +49,32 @@ public class BookController {
 	
 	@GetMapping("{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public BookDTO findById(@PathVariable Long id) {
-		return bookService
-				.getById(id)
-				.map( book -> modelMapper.map(book , BookDTO.class))
-				.get();
+	public BookDTO get(@PathVariable Long id) {
+	    return bookService
+                .getById(id)
+                .map( book -> modelMapper.map(book, BookDTO.class)  )
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
 	}
 	
 	
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable Long id) {
-		Book book = bookService.getById(id).get();
-		bookService.delete(book);
+		 Book book = bookService.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+		 bookService.delete(book);
 	}
 	
 	@PutMapping("{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public BookDTO update(@PathVariable Long id , BookDTO dto) {
-		Book book = bookService.getById(id).get();
-		
-		book.setAuthor(dto.getAuthor());
-		book.setTittle(dto.getTittle());
-		book = bookService.update(book);
-		
-		return modelMapper.map(book, BookDTO.class);
+		  return bookService.getById(id).map( book -> {
+
+	            book.setAuthor(dto.getAuthor());
+	            book.setTittle(dto.getTittle());
+	            book = bookService.update(book);
+	            return modelMapper.map(book, BookDTO.class);
+
+	     }).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
 	}
 	
 	

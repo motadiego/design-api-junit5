@@ -25,8 +25,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.example.libraryapi.dto.LoanDTO;
+import com.example.libraryapi.dto.ReturnedLoanDTO;
 import com.example.libraryapi.exceptions.BusinnesException;
-import com.example.libraryapi.exceptions.EntityNotFoundException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.model.Loan;
 import com.example.libraryapi.service.BookService;
@@ -81,24 +81,20 @@ public class LoanControllerTest {
 	@Test
 	@DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro inexistente.")
 	public void invalidIsbnCreateLoanTest() throws Exception  {
-		// cenario
-		LoanDTO dto = creanteNewLoanDTO();
-		String json = new ObjectMapper().writeValueAsString(dto);
-		
-		String mensagemErro = "Livro não encontrado para o isbn";
-		BDDMockito.given(bookService.getBookByIsbn("123")).willThrow(new EntityNotFoundException(mensagemErro));
-		
-		// execucao
-		MockHttpServletRequestBuilder request = 
-				MockMvcRequestBuilders.post(LOAN_API)
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.content(json);
-		
-		mvc.perform(request)
-		 .andExpect(status().isNotFound())
-		 .andExpect(jsonPath("error").exists())
-		 .andExpect(jsonPath("message").value(mensagemErro));
+		 LoanDTO dto = LoanDTO.builder().isbn("123").customer("Fulano").build();
+	     String json = new ObjectMapper().writeValueAsString(dto);
+
+	     BDDMockito.given( bookService.getBookByIsbn("123") ).willReturn( Optional.empty() );
+
+	     MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(LOAN_API)
+	                .accept(MediaType.APPLICATION_JSON)
+	                .contentType(MediaType.APPLICATION_JSON)
+	                .content(json);
+
+	      mvc.perform( request )
+	         .andExpect( status().isNotFound())
+	         .andExpect(jsonPath("error").exists())
+	  		 .andExpect(jsonPath("message").value("Livro não encontrado para o isbn informado."));
 	}
 	
 	
@@ -133,6 +129,52 @@ public class LoanControllerTest {
 	
 	public LoanDTO creanteNewLoanDTO() {
 		return LoanDTO.builder().isbn("123").customer("Fulano").build();
+	}
+	
+	@Test
+	@DisplayName("Deve retornar um empréstimo")
+	public void returnBookTest() throws Exception {
+		// cenario
+		ReturnedLoanDTO dto = ReturnedLoanDTO.builder().returned(true).build();
+		String json = new ObjectMapper().writeValueAsString(dto);
+		
+		Loan loan = Loan.builder().id(1L).build();
+		BDDMockito.given(loanService.getById(1L)).willReturn(Optional.of(loan));
+		
+		
+		// execucao
+		MockHttpServletRequestBuilder request = 
+				MockMvcRequestBuilders.patch(LOAN_API + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(json);
+		
+		
+		// verificacao
+		mvc.perform(request).andExpect(status().isOk());
+		
+		Mockito.verify(loanService , Mockito.times(1)).update(loan);
+	}
+	
+	
+	@Test
+	@DisplayName("Deve retornar 404 quando tentar devolver um empréstimo inexistente")
+	public void returnInexistentBookTest() throws Exception {
+		//cenário
+        ReturnedLoanDTO dto = ReturnedLoanDTO.builder().returned(true).build();
+        String json = new ObjectMapper().writeValueAsString(dto);
+
+        BDDMockito.given(loanService.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+        mvc.perform(
+        		MockMvcRequestBuilders.patch(LOAN_API.concat("/1"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect( status().isNotFound())
+         .andExpect(jsonPath("error").exists())
+         .andExpect(jsonPath("message").value("Empréstimo não encontrado."));
+        
 	}
 	
 }

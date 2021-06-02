@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Optional;
 
-
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.example.libraryapi.dto.BookDTO;
 import com.example.libraryapi.exceptions.BusinnesException;
-import com.example.libraryapi.exceptions.EntityNotFoundException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -146,27 +144,21 @@ public class BookControllerTest {
 	}
 	
 	
-	@Test
-	@DisplayName("Deve lançar erro ao buscar por um livro não cadastrado")
-	public void bookNotFound() throws Exception {
-		
-		// cenario (given)
-		Long id =  1L;
-		
-		String mensagemErro = "Livro não encontrado";
-		BDDMockito.given(service.getById(Mockito.anyLong())).willThrow(new EntityNotFoundException(mensagemErro));
+	  @Test
+	  @DisplayName("Deve retornar resource not found quando o livro procurado não existir")
+	  public void bookNotFoundTest() throws Exception {
 
-		// execucao (when)
-		MockHttpServletRequestBuilder request = 
-			MockMvcRequestBuilders.get(BOOK_API.concat("/" + id))
-				.accept(MediaType.APPLICATION_JSON);
-		
-		
-		mvc.perform(request)
-		 .andExpect(status().isNotFound())
-		 .andExpect(jsonPath("error").exists())
-		 .andExpect(jsonPath("message").value(mensagemErro));
-	}
+	        BDDMockito.given( service.getById(Mockito.anyLong()) ).willReturn( Optional.empty() );
+
+	        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+	                .get(BOOK_API.concat("/" + 1))
+	                .accept(MediaType.APPLICATION_JSON);
+
+	        mvc
+	            .perform(request)
+	            .andExpect(status().isNotFound());
+	  }
+
 	
 	@Test
 	@DisplayName("Deve deletar um livro")
@@ -191,19 +183,13 @@ public class BookControllerTest {
 	@DisplayName("Deve retornar resource not foud quando não encontrar o livro para deletar")
 	public void deleteInexistentBookTest() throws Exception {
 		// cenario (given)
-		Long id =  1L;
-		
-		String mensagemErro = "Livro não encontrado";
-		BDDMockito.given(service.getById(Mockito.anyLong())).willThrow(new EntityNotFoundException(mensagemErro));
+		 BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
 
-		// execucao (when)
-		MockHttpServletRequestBuilder request = 
-			MockMvcRequestBuilders.delete(BOOK_API.concat("/" + id));
-		
-		mvc.perform(request)
-		 .andExpect(status().isNotFound())
-		 .andExpect(jsonPath("error").exists())
-		 .andExpect(jsonPath("message").value(mensagemErro));
+	     MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+	                .delete(BOOK_API.concat("/" + 1));
+
+	     mvc.perform( request )
+	       .andExpect( status().isNotFound() );
 	}
 	
 	
@@ -252,21 +238,18 @@ public class BookControllerTest {
 	@Test
 	@DisplayName("Deve retornar 404 quando tentar devolver um livro inexistente")
 	public void updateInexistentBookTest() throws Exception {
-		// cenario (given)
-		Long id =  1L;
 		
-		String mensagemErro = "Livro não encontrado";
-		BDDMockito.given(service.getById(Mockito.anyLong())).willThrow(new EntityNotFoundException(mensagemErro));
+		String json = new ObjectMapper().writeValueAsString(createNewBookDTO());
+        BDDMockito.given( service.getById(Mockito.anyLong())).willReturn( Optional.empty() );
 
-		// execucao (when)
-		MockHttpServletRequestBuilder request = 
-			MockMvcRequestBuilders.put(BOOK_API.concat("/" + id));
-		
-		mvc.perform(request)
-		 .andExpect(status().isNotFound())
-		 .andExpect(jsonPath("error").exists())
-		 .andExpect(jsonPath("message").value(mensagemErro));
-		
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(BOOK_API.concat("/" + 1))
+                .content(json)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound() );
 	}
 	
 	@Test

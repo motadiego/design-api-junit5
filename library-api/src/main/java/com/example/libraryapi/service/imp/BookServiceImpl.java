@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.libraryapi.exceptions.BusinnesException;
-import com.example.libraryapi.exceptions.EntityNotFoundException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.repository.BookRepository;
 import com.example.libraryapi.service.BookService;
@@ -36,20 +35,14 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Optional<Book> getById(Long id) {
-		Optional<Book> book = repository.findById(id);
-		
-		if(!book.isPresent()) {
-			throw new EntityNotFoundException("Livro não encontrado");	
-		}
-		
-		return book;
+		return repository.findById(id);
 	}
 
 
 	@Override
 	public void delete(Book book) {
 		if(book == null || book.getId() == null) {
-			throw new IllegalArgumentException("Book id cant be null");
+			throw new IllegalArgumentException("Livro não pode ser null");
 		}
 		
 		this.repository.delete(book);
@@ -59,7 +52,7 @@ public class BookServiceImpl implements BookService {
 	@Override
 	public Book update(Book book) {
 		if(book == null || book.getId() == null) {
-			throw new IllegalArgumentException("Book id cant be null");
+			throw new IllegalArgumentException("Livro não pode ser null");
 		}
 		
 		return this.repository.save(book);

@@ -23,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.libraryapi.exceptions.BusinnesException;
-import com.example.libraryapi.exceptions.EntityNotFoundException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.repository.BookRepository;
 import com.example.libraryapi.service.imp.BookServiceImpl;
@@ -112,22 +111,16 @@ public class BookServiceTest {
 	}
 	
 	@Test
-	@DisplayName("Deve lançar exceção de entidade não encontrada ao obter um livro por Id quando ele não existe na base.")
+	@DisplayName("Deve retornar vazio ao obter um livro por Id quando ele não existe na base.")
 	public void bookNotFoundByIdTest() {
-		//cenario
-		Long id = 1L;
-		Mockito.when(repository.findById(id)).thenReturn(Optional.empty());
-		
-		// execucao
-		Throwable exception =  Assertions.catchThrowable(() -> service.getById(id)); 
-	
-		//verificacoes
-		assertThat(exception)
-			.isInstanceOf(EntityNotFoundException.class)
-			.hasMessage("Livro não encontrado");
-		
-		// verificar executou uma vez o metodo
-		Mockito.verify(repository, Mockito.times(1)).findById(id);
+		 Long id = 1l;
+	     Mockito.when( repository.findById(id) ).thenReturn(Optional.empty());
+
+	     //execucao
+	     Optional<Book> book = service.getById(id);
+
+	     //verificacoes
+	      assertThat( book.isPresent() ).isFalse();
 	}
 	
 	
@@ -138,14 +131,14 @@ public class BookServiceTest {
 		Book book = Book.builder().id(1L).build();
 		
 		// execucao
-		repository.delete(book);
+		org.junit.jupiter.api.Assertions.assertDoesNotThrow( () -> service.delete(book) );
 		
 		// verificacao
 		Mockito.verify(repository, Mockito.times(1)).delete(book);
 	}
 	
 	@Test
-	@DisplayName("Deve lançar exceção IllegalArgumentException ao tentar deletar um livro inexistente")
+	@DisplayName("Deve ocorrer erro ao tentar deletar um livro inexistente.")
 	public void deleteInvalidBookTest(){
 		// cenario
 		Book book = new Book();
@@ -156,7 +149,7 @@ public class BookServiceTest {
 		//verificacoes
 		assertThat(exception)
 			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Book id cant be null");
+			.hasMessage("Livro não pode ser null");
 				
 		Mockito.verify(repository, Mockito.never()).delete(book);
 	}
@@ -200,7 +193,7 @@ public class BookServiceTest {
 		//verificacoes
 		assertThat(exception)
 			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Book id cant be null");
+			.hasMessage("Livro não pode ser null");
 				
 		Mockito.verify(repository, Mockito.never()).save(book);
 	}
