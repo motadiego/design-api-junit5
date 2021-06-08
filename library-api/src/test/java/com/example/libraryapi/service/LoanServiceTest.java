@@ -168,7 +168,6 @@ public class LoanServiceTest {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	@DisplayName("Deve filtrar empréstimos pelas propriedades")
 	public void findLoanTest() {
