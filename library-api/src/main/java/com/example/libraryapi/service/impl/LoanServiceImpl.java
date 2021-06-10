@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import com.example.libraryapi.dto.LoanFilterDTO;
 import com.example.libraryapi.exceptions.BusinnesException;
@@ -14,6 +15,7 @@ import com.example.libraryapi.model.Loan;
 import com.example.libraryapi.repository.LoanRepository;
 import com.example.libraryapi.service.LoanService;
 
+@Service
 public class LoanServiceImpl implements LoanService {
 
 	private static final Integer LOAN_DAYS = 4;
