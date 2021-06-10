@@ -1,4 +1,4 @@
-package com.example.libraryapi.service;
+package com.example.libraryapi.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.libraryapi.model.Loan;
+import com.example.libraryapi.service.EmailService;
+import com.example.libraryapi.service.LoanService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
@@ -17,7 +19,7 @@ import lombok.extern.log4j.Log4j;
 @Service
 @RequiredArgsConstructor
 @Log4j
-public class ScheduleService {
+public class ScheduleServiceImpl {
 	
 	/**
 	 * Usar o site http://www.cronmaker.com/ para gerar CRON
