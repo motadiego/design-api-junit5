@@ -25,7 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.example.libraryapi.exceptions.BusinnesException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.repository.BookRepository;
-import com.example.libraryapi.service.imp.BookServiceImpl;
+import com.example.libraryapi.service.impl.BookServiceImpl;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")

@@ -26,7 +26,7 @@ import com.example.libraryapi.exceptions.BusinnesException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.model.Loan;
 import com.example.libraryapi.repository.LoanRepository;
-import com.example.libraryapi.service.imp.LoanServiceImpl;
+import com.example.libraryapi.service.impl.LoanServiceImpl;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")

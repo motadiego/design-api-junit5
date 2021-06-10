@@ -30,6 +30,7 @@ import com.example.libraryapi.dto.BookDTO;
 import com.example.libraryapi.exceptions.BusinnesException;
 import com.example.libraryapi.model.Book;
 import com.example.libraryapi.service.BookService;
+import com.example.libraryapi.service.LoanService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(SpringExtension.class)
@@ -41,10 +42,13 @@ public class BookControllerTest {
 	static String BOOK_API = "/api/books";
 
 	@Autowired
-	MockMvc mvc;
+	private MockMvc mvc;
 
 	@MockBean
-	BookService service;
+	private BookService bookService;
+	
+	@MockBean
+	private LoanService loanService;
 
 	@Test
 	@DisplayName("Deve criar um livro com sucesso.")
@@ -53,7 +57,7 @@ public class BookControllerTest {
 		BookDTO dto = BookDTO.builder().tittle("Artur").author("Asaventuras").isbn("001").build();
 		Book savedBook = Book.builder().id(10L).tittle("Artur").author("Asaventuras").isbn("001").build();
 
-		BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(savedBook);
+		BDDMockito.given(bookService.save(Mockito.any(Book.class))).willReturn(savedBook);
 
 		String json = new ObjectMapper().writeValueAsString(dto);
 
@@ -94,7 +98,7 @@ public class BookControllerTest {
 		String json = new ObjectMapper().writeValueAsString(dto);
 
 		String mensagemErro = "Isbn já cadastrado";
-		BDDMockito.given(service.save(Mockito.any(Book.class))).willThrow(new BusinnesException(mensagemErro));
+		BDDMockito.given(bookService.save(Mockito.any(Book.class))).willThrow(new BusinnesException(mensagemErro));
 
 		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +128,7 @@ public class BookControllerTest {
 					.isbn(bookDTO.getIsbn())
 				.build();
 		
-		BDDMockito.given(service.getById(id)).willReturn(Optional.of(book));
+		BDDMockito.given(bookService.getById(id)).willReturn(Optional.of(book));
 		
 		
 		// execucao (when)
@@ -148,7 +152,7 @@ public class BookControllerTest {
 	  @DisplayName("Deve retornar resource not found quando o livro procurado não existir")
 	  public void bookNotFoundTest() throws Exception {
 
-	        BDDMockito.given( service.getById(Mockito.anyLong()) ).willReturn( Optional.empty() );
+	        BDDMockito.given( bookService.getById(Mockito.anyLong()) ).willReturn( Optional.empty() );
 
 	        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
 	                .get(BOOK_API.concat("/" + 1))
@@ -166,7 +170,7 @@ public class BookControllerTest {
 		// cenario (given)
 		Long id =  1L;
 		
-		BDDMockito.given(service.getById(1L)).willReturn(Optional.of(Book.builder().id(1L).build()));
+		BDDMockito.given(bookService.getById(1L)).willReturn(Optional.of(Book.builder().id(1L).build()));
 		
 		// execucao (when)
 		MockHttpServletRequestBuilder request = 
@@ -183,7 +187,7 @@ public class BookControllerTest {
 	@DisplayName("Deve retornar resource not foud quando não encontrar o livro para deletar")
 	public void deleteInexistentBookTest() throws Exception {
 		// cenario (given)
-		 BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
+		 BDDMockito.given(bookService.getById(Mockito.anyLong())).willReturn(Optional.empty());
 
 	     MockHttpServletRequestBuilder request = MockMvcRequestBuilders
 	                .delete(BOOK_API.concat("/" + 1));
@@ -211,11 +215,11 @@ public class BookControllerTest {
 				.isbn("321")
 			.build();
 		
-		BDDMockito.given(service.getById(id)).willReturn(Optional.of(updatingBook));
+		BDDMockito.given(bookService.getById(id)).willReturn(Optional.of(updatingBook));
 		
 		// livro com os dados atualizados
 		Book updatedBook = Book.builder().id(id).tittle("Artur").author("As aventuras").isbn("321").build();
-		BDDMockito.given(service.update(updatingBook)).willReturn(updatedBook);
+		BDDMockito.given(bookService.update(updatingBook)).willReturn(updatedBook);
 		
 		
 		// execucao (when)
@@ -240,7 +244,7 @@ public class BookControllerTest {
 	public void updateInexistentBookTest() throws Exception {
 		
 		String json = new ObjectMapper().writeValueAsString(createNewBookDTO());
-        BDDMockito.given( service.getById(Mockito.anyLong())).willReturn( Optional.empty() );
+        BDDMockito.given( bookService.getById(Mockito.anyLong())).willReturn( Optional.empty() );
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .put(BOOK_API.concat("/" + 1))
@@ -265,7 +269,7 @@ public class BookControllerTest {
 				.isbn(createNewBookDTO().getIsbn())
 			.build();
 		
-		BDDMockito.given( service.find(Mockito.any(Book.class), Mockito.any(Pageable.class)) )
+		BDDMockito.given( bookService.find(Mockito.any(Book.class), Mockito.any(Pageable.class)) )
         .willReturn( new PageImpl<Book>( Arrays.asList(book), PageRequest.of(0,100), 1 ));
 
 		String queryString = String.format("?title=%s&author=%s&page=0&size=100", book.getTittle(), book.getAuthor());
