@@ -28,11 +28,16 @@ import com.example.libraryapi.model.Loan;
 import com.example.libraryapi.service.BookService;
 import com.example.libraryapi.service.LoanService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
+@Api("Book API")
 public class BookController {
 	
 	private final BookService service;
@@ -42,6 +47,7 @@ public class BookController {
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@ApiOperation("Creates ebook")
 	public BookDTO create(@RequestBody @Valid BookDTO dto) {
 		Book entity = modelMapper.map(dto, Book.class);
 	
@@ -52,6 +58,7 @@ public class BookController {
 	
 	@GetMapping("{id}")
 	@ResponseStatus(HttpStatus.OK)
+	@ApiOperation("Obtains a book details by id")
 	public BookDTO get(@PathVariable Long id) {
 	    return service
                 .getById(id)
@@ -62,6 +69,10 @@ public class BookController {
 	
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@ApiOperation("Deletes a book by id")
+	@ApiResponses({
+		@ApiResponse( code = 204 , message = "Book succesfully deleted")
+	})
 	public void delete(@PathVariable Long id) {
 		 Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
 		 service.delete(book);
@@ -69,6 +80,7 @@ public class BookController {
 	
 	@PutMapping("{id}")
 	@ResponseStatus(HttpStatus.OK)
+	@ApiOperation("Updates a book")
 	public BookDTO update(@PathVariable Long id , BookDTO dto) {
 		  return service.getById(id).map( book -> {
 	            book.setAuthor(dto.getAuthor());
@@ -81,6 +93,7 @@ public class BookController {
 	
 	
 	@GetMapping
+	@ApiOperation("Find books by params")
 	public Page<BookDTO> find(BookDTO bookDTO , Pageable pageRequest){
 		Book filter = modelMapper.map(bookDTO , Book.class);
 		Page<Book> result = service.find(filter, pageRequest);

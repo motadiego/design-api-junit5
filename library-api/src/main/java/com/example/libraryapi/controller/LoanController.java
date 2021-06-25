@@ -50,6 +50,7 @@ public class LoanController {
 		Loan entity = Loan.builder()
                 .book(book)
                 .customer(dto.getCustomer())
+                .customerEmail(dto.getEmail())
                 .loanDate(LocalDate.now())
                 .build();
 		
@@ -76,6 +77,7 @@ public class LoanController {
 				BookDTO bookDTO = modelMapper.map(book , BookDTO.class);
 				LoanDTO loanDTO = modelMapper.map(entity , LoanDTO.class);
 				loanDTO.setBook(bookDTO);
+				loanDTO.setIsbn(bookDTO.getIsbn());
 				return loanDTO;
 			})   
 			.collect(Collectors.toList());
